@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Browser Storage Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📁 Storage Utility Browser Test</h1>
+        <p>Testing localStorage wrapper functionality</p>
+        
+        <div class="test-section">
+            <h3>Test Controls</h3>
+            <button id="runTests">Run All Tests</button>
+            <button id="clearTests">Clear Results</button>
+            <button id="clearStorage">Clear localStorage</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Results</h3>
+            <div id="output"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Current Storage Contents</h3>
+            <pre id="storageContents"></pre>
+        </div>
+        
+        <div class="test-section">
+            <h3>Manual Tests</h3>
+            <input type="text" id="keyInput" placeholder="Key" value="testKey">
+            <input type="text" id="valueInput" placeholder="Value" value='{"name":"Test","value":123}'>
+            <button id="createBtn">Create</button>
+            <button id="readBtn">Read</button>
+            <button id="deleteBtn">Delete</button>
+        </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script>
+        const storage = new Storage('browser');
+        const output = document.getElementById('output');
+        const storageContents = document.getElementById('storageContents');
+        
+        function log(message, isError = false) {
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="${isError ? 'error' : 'success'}">${isError ? '✗' : '✓'} ${message}</span>`;
+            output.appendChild(div);
+        }
+        
+        function updateStorageView() {
+            const allData = {};
+            storage.list().forEach(key => {
+                allData[key] = storage.read(key);
+            });
+            storageContents.textContent = JSON.stringify(allData, null, 2);
+        }
+        
+        // Test functions
+        function testCreate() {
+            try {
+                storage.create('testUser', {
+                    name: 'Alice',
+                    age: 25,
+                    email: 'alice@example.com'
+                });
+                log('CREATE: Test user created successfully');
+                return true;
+            } catch (error) {
+                log(`CREATE failed: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        function testRead() {
+            try {
+                const user = storage.read('testUser');
+                if (user && user.name === 'Alice') {
+                    log(`READ: Retrieved user: ${user.name}, Age: ${user.age}`);
+                    return true;
+                } else {
+                    log('READ: Failed to retrieve correct data', true);
+                    return false;
+                }
+            } catch (error) {
+                log(`READ failed: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        function testUpdate() {
+            try {
+                // Merge update
+                storage.update('testUser', { age: 26, city: 'London' }, true);
+                const updated = storage.read('testUser');
+                if (updated.city === 'London' && updated.name === 'Alice') {
+                    log('UPDATE: Successfully merged new data');
+                    return true;
+                } else {
+                    log('UPDATE: Merge failed', true);
+                    return false;
+                }
+            } catch (error) {
+                log(`UPDATE failed: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        function testDelete() {
+            try {
+                storage.create('tempData', { value: 'to be deleted' });
+                storage.delete('tempData');
+                if (!storage.has('tempData')) {
+                    log('DELETE: Successfully removed data');
+                    return true;
+                } else {
+                    log('DELETE: Data still exists', true);
+                    return false;
+                }
+            } catch (error) {
+                log(`DELETE failed: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        function testListAndHas() {
+            try {
+                const keys = storage.list();
+                const hasTestUser = storage.has('testUser');
+                log(`LIST: Found ${keys.length} keys: ${keys.join(', ')}`);
+                log(`HAS: 'testUser' exists? ${hasTestUser}`);
+                return true;
+            } catch (error) {
+                log(`LIST/HAS failed: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        function testStats() {
+            try {
+                const stats = storage.stats();
+                log(`STATS: Type: ${stats.type}, Items: ${stats.itemCount}`);
+                return true;
+            } catch (error) {
+                log(`STATS failed: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        function testClear() {
+            try {
+                storage.create('clearTest1', { data: 1 });
+                storage.create('clearTest2', { data: 2 });
+                storage.clear();
+                if (storage.list().length === 0) {
+                    log('CLEAR: All data removed successfully');
+                    return true;
+                } else {
+                    log('CLEAR: Failed to clear all data', true);
+                    return false;
+                }
+            } catch (error) {
+                log(`CLEAR failed: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        // Manual test functions
+        function manualCreate() {
+            const key = document.getElementById('keyInput').value;
+            const value = document.getElementById('valueInput').value;
+            
+            try {
+                const parsedValue = JSON.parse(value);
+                storage.create(key, parsedValue);
+                log(`Manual CREATE: ${key} = ${JSON.stringify(parsedValue)}`);
+                updateStorageView();
+            } catch (error) {
+                log(`Manual CREATE failed: ${error.message}`, true);
+            }
+        }
+        
+        function manualRead() {
+            const key = document.getElementById('keyInput').value;
+            const value = storage.read(key);
+            log(`Manual READ: ${key} = ${JSON.stringify(value)}`);
+        }
+        
+        function manualDelete() {
+            const key = document.getElementById('keyInput').value;
+            storage.delete(key);
+            log(`Manual DELETE: ${key} removed`);
+            updateStorageView();
+        }
+        
+        // Control functions
+        function runAllTests() {
+            output.innerHTML = '';
+            log('=== Starting All Tests ===');
+            
+            // Run tests in sequence
+            setTimeout(() => { 
+                if(testCreate()) {
+                    setTimeout(() => { 
+                        if(testRead()) {
+                            setTimeout(() => { 
+                                if(testUpdate()) {
+                                    setTimeout(() => { 
+                                        if(testDelete()) {
+                                            setTimeout(() => { 
+                                                if(testListAndHas()) {
+                                                    setTimeout(() => { 
+                                                        if(testStats()) {
+                                                            setTimeout(() => { 
+                                                                if(testClear()) {
+                                                                    log('=== All Tests Completed Successfully! ===');
+                                                                    updateStorageView();
+                                                                }
+                                                            }, 100); 
+                                                        }
+                                                    }, 100); 
+                                                }
+                                            }, 100); 
+                                        }
+                                    }, 100); 
+                                }
+                            }, 100); 
+                        }
+                    }, 100); 
+                }
+            }, 100);
+        }
+        
+        function clearTests() {
+            output.innerHTML = '';
+            log('Test results cleared');
+        }
+        
+        function clearStorage() {
+            storage.clear();
+            log('localStorage cleared');
+            updateStorageView();
+        }
+        
+        // Event listeners
+        document.getElementById('runTests').addEventListener('click', runAllTests);
+        document.getElementById('clearTests').addEventListener('click', clearTests);
+        document.getElementById('clearStorage').addEventListener('click', clearStorage);
+        document.getElementById('createBtn').addEventListener('click', manualCreate);
+        document.getElementById('readBtn').addEventListener('click', manualRead);
+        document.getElementById('deleteBtn').addEventListener('click', manualDelete);
+        
+        // Initialize
+        updateStorageView();
+        log('Ready to test! Click "Run All Tests" to begin.');
+    </script>
+</body>
+</html>

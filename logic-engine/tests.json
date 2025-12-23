@@ -1,0 +1,85 @@
+{
+    "testCases": [
+        {
+            "name": "High Temperature Alert",
+            "input": {
+                "temperature": 35,
+                "humidity": 60,
+                "location": "server-room-1"
+            },
+            "expectedTags": ["high-temp", "needs-review"],
+            "expectedAlerts": 1,
+            "expectedTriggeredRules": 1
+        },
+        {
+            "name": "Urgent Message Detection",
+            "input": {
+                "message": "This is an URGENT request for assistance",
+                "sender": "admin",
+                "priority": "normal"
+            },
+            "expectedTags": ["urgent", "priority"],
+            "expectedAlerts": 1,
+            "expectedTriggeredRules": 1
+        },
+        {
+            "name": "Multiple Rules Triggered",
+            "input": {
+                "temperature": 28,
+                "humidity": 65,
+                "status": "active",
+                "priority": "high",
+                "message": "Emergency system update"
+            },
+            "expectedTags": ["optimal-conditions", "urgent", "priority"],
+            "expectedAlerts": 1,
+            "expectedTriggeredRules": 2
+        },
+        {
+            "name": "No Rules Triggered",
+            "input": {
+                "temperature": 20,
+                "humidity": 80,
+                "message": "Regular daily report",
+                "status": "inactive"
+            },
+            "expectedTags": [],
+            "expectedAlerts": 0,
+            "expectedTriggeredRules": 0
+        },
+        {
+            "name": "Custom Threshold Between",
+            "description": "Testing custom rule added at runtime",
+            "input": {
+                "score": 85,
+                "category": "performance"
+            },
+            "rulesToAdd": [
+                {
+                    "id": "score_range",
+                    "name": "Good Score Range",
+                    "condition": {
+                        "type": "threshold",
+                        "field": "score",
+                        "operator": "between",
+                        "threshold": {
+                            "min": 80,
+                            "max": 90
+                        }
+                    },
+                    "actions": {
+                        "addTags": ["good-performance"]
+                    }
+                }
+            ],
+            "expectedTags": ["good-performance"],
+            "expectedAlerts": 0,
+            "expectedTriggeredRules": 1
+        }
+    ],
+    
+    "exampleUsage": {
+        "description": "How to use the logic engine in code",
+        "javascriptExample": "const { LogicEngine, createExampleEngine } = require('./engine.js');\n\n// Method 1: Create engine with example rules\nconst engine1 = createExampleEngine();\nconst result1 = engine1.evaluate({ temperature: 35, humidity: 50 });\n\n// Method 2: Create empty engine and add custom rules\nconst engine2 = new LogicEngine();\nengine2.addRule({\n    id: 'custom_rule',\n    condition: {\n        type: 'threshold',\n        field: 'value',\n        operator: 'greaterThan',\n        threshold: 100\n    },\n    actions: {\n        addTags: ['exceeded-limit']\n    }\n});\nconst result2 = engine2.evaluate({ value: 150 });"
+    }
+}

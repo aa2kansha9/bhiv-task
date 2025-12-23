@@ -1,0 +1,109 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.App-header p {
+  margin: 10px 0 0;
+  color: #61dafb;
+  font-size: 1rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.instructions {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.instructions ul {
+  padding-left: 20px;
+}
+
+.instructions li {
+  margin-bottom: 5px;
+}
+
+.wrapper-info {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.wrapper-info h3 {
+  color: #282c34;
+  border-bottom: 2px solid #61dafb;
+  padding-bottom: 10px;
+}
+
+.wrapper-info ul, .wrapper-info ol {
+  padding-left: 20px;
+}
+
+.wrapper-info li {
+  margin-bottom: 8px;
+}
+
+footer {
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+  margin-top: 40px;
+}
+
+footer code {
+  background-color: #3a3f4b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:not(:disabled):hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  transition: all 0.2s;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .App-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .buttonGroup {
+    flex-direction: column;
+  }
+}
